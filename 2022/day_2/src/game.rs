@@ -1,24 +1,17 @@
 use crate::round::{Round, Rps};
 
+#[derive(Debug)]
 pub struct Game {
-    my_plays: Vec<Rps>,
-    oponent_plays: Vec<Rps>,
+    pub my_plays: Vec<Rps>,
+    pub oponent_plays: Vec<Rps>,
 }
 
 impl Game {
-    pub fn new() -> Game {
+    pub fn new(my_plays: Vec<Rps>, oponent_plays: Vec<Rps>) -> Game {
         Game {
-            my_plays: Vec::new(),
-            oponent_plays: Vec::new(),
+            my_plays,
+            oponent_plays,
         }
-    }
-
-    pub fn add_my_play(&mut self, my_play: Rps) {
-        self.my_plays.push(my_play);
-    }
-
-    pub fn add_oponent_play(&mut self, oponent_play: Rps) {
-        self.oponent_plays.push(oponent_play);
     }
 
     pub fn get_score(&self) -> u32 {

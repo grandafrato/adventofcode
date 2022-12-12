@@ -44,6 +44,22 @@ pub enum Rps {
     Scissors,
 }
 
+pub fn rps_to_win(oponent_play: Rps) -> Rps {
+    match oponent_play {
+        Rps::Rock => Rps::Scissors,
+        Rps::Paper => Rps::Rock,
+        Rps::Scissors => Rps::Paper,
+    }
+}
+
+pub fn rps_to_lose(oponent_play: Rps) -> Rps {
+    match oponent_play {
+        Rps::Rock => Rps::Paper,
+        Rps::Paper => Rps::Scissors,
+        Rps::Scissors => Rps::Rock,
+    }
+}
+
 fn calculate_rps_score(rps: &Rps) -> u32 {
     match rps {
         Rps::Rock => 1,

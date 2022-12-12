@@ -6,14 +6,21 @@ use crate::round::Rps;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+    let file_data = get_file_data(&args[1]);
 
-    let moves = parse_file_data(get_file_data(&args[1]));
+    let first_puzzle_moves = letters_are_moves(&file_data);
+    let second_puzzle_moves = letters_are_results(file_data);
 
-    let game = game_from_moves(moves);
+    let game1 = game_from_moves(first_puzzle_moves);
+    let game2 = game_from_moves(second_puzzle_moves);
 
     println!(
-        "Using all the moves, {} is the final score!",
-        game.get_score()
+        "If the letters are moves, {:?} is the final score!\n\n",
+        game1.my_plays //game1.get_score()
+    );
+    println!(
+        "If the letters are intended results, {:?} is the final score!",
+        game2.oponent_plays
     );
 }
 
@@ -26,7 +33,7 @@ enum GameMove {
     OponentMove(Rps),
 }
 
-fn parse_file_data(data: String) -> Vec<GameMove> {
+fn letters_are_moves(data: &str) -> Vec<GameMove> {
     let mut moves = Vec::new();
 
     for character in data.split_whitespace() {
@@ -44,16 +51,47 @@ fn parse_file_data(data: String) -> Vec<GameMove> {
     moves
 }
 
-fn game_from_moves(moves: Vec<GameMove>) -> Game {
-    let mut game = Game::new();
-    for game_move in moves.into_iter() {
-        match game_move {
-            GameMove::OponentMove(play) => game.add_oponent_play(play),
-            GameMove::MyMove(play) => game.add_my_play(play),
+fn letters_are_results(data: String) -> Vec<GameMove> {
+    let mut moves = Vec::new();
+    let characters = data.split_whitespace();
+    let characters_skipped = data.split_whitespace().skip(1);
+
+    for (oponent_character, my_character) in characters.zip(characters_skipped).step_by(2) {
+        let oponent_rps = interperet_oponent(oponent_character).unwrap();
+        moves.push(GameMove::OponentMove(oponent_rps));
+
+        match my_character {
+            "X" => moves.push(GameMove::MyMove(round::rps_to_lose(oponent_rps))),
+            "Y" => moves.push(GameMove::MyMove(oponent_rps)),
+            "Z" => moves.push(GameMove::MyMove(round::rps_to_win(oponent_rps))),
+            _ => (),
         }
     }
 
-    game
+    moves
+}
+
+fn interperet_oponent(character: &str) -> Option<Rps> {
+    match character {
+        "A" => Some(Rps::Rock),
+        "B" => Some(Rps::Paper),
+        "C" => Some(Rps::Scissors),
+        _ => None,
+    }
+}
+
+fn game_from_moves(moves: Vec<GameMove>) -> Game {
+    let mut my_plays = Vec::new();
+    let mut oponent_plays = Vec::new();
+
+    for game_move in moves.into_iter() {
+        match game_move {
+            GameMove::OponentMove(play) => oponent_plays.push(play),
+            GameMove::MyMove(play) => my_plays.push(play),
+        }
+    }
+
+    Game::new(my_plays, oponent_plays)
 }
 
 mod game;
